@@ -1,0 +1,70 @@
+fr
+	add					Ajouter
+	edit				Modifier
+	del					Enlever
+	run					Run Mame
+	romdirUpdate		Rafraichir
+	ok					Ok
+	cancel				Annuler
+	saveConfig			Enregistrer
+	guess				Deviner cette release
+	colName				Nom
+	colRomscount		Roms
+	colPath				Chemin
+	colVersion			Version
+	colSize				Taille
+	colComment			Commentaires
+	colWarning			Important
+	colError			Erreur
+	colCRC				CRC md5
+	
+	addMameTitle					Ajouter une installation Mame
+	editMameTitle					Modifier une installation Mame
+	
+	mameExeFrameLabel				Versions de Mame :
+	romdirFrameLabel				Dossiers de romset :
+	romsetsFrameLabel				Romsets du dossier %s (%s) :
+	romsetFrameLabel				Romset %s, dossier %s :
+	
+	addRomdirTitle					Ajouter un dossier de romset
+	EditRomdirTitle					Modifier un dossier de romset
+	
+	addName							Name :
+	addPath							Path :
+	addVersion						Version :
+
+	addPathTitleMame				Selectionner un programme Mame
+	addPathTitleRomdir				Selectionner un dossier de romset
+	
+	errorNameEmptyTitle				Aucun nom
+	errorNameEmptyMame				Merci de renseigner un nom pour cette installation.
+	errorNameEmptyRomdir			Merci de renseigner un nom pour ce dossier de romset.
+	
+	errorNameExistTitle				Ce nom existe déjà
+	errorNameExistMame				Merci de renseigner un nom différent pour cette installation.
+	errorNameExistRomdir			Merci de renseigner un nom différent pour ce dossier de romset.
+	
+	errorArgNotString				%s must be a string.
+	errorArgNotExist				Cet élément n'existe pas.
+
+	errorPathExistTitle				Ce Chemin existe déjà
+	errorPathExistMame				Cette installation de Mame figure déjà dans la liste.
+	errorPathExistRomdir			Ce dossier de romset figure déjà dans la liste.
+	
+	errorPathEmptyTitle				Aucun chemin
+	errorPathEmptyMame				Merci de renseigner un chemin vers cette installation.
+	warningNameEmptyMameApi			Merci de renseigner un nom pour cette installation si vous souhaitez la sauvegarder ensuite.
+	errorPathEmptyRomdir			Merci de renseigner un dossier de romset.
+	
+	errorPathWrongTitle				Mauvais chemin
+	errorPathWrong					Ce chemin n'existe pas.
+
+	errorMameNone					Definir au moins une installation de Mame.
+	errorMameUnknown				installation de Mame inconnue : %s.
+	errorMameType					Mauvais type. l'argument de l'installation de Mame doi être un string, un integer ou une instance de Mame.
+	errorMameIndex					l'index de l'installation de Mame est faux. La valeur doir être comprise entre 0 et %s.
+	
+	infoMameAvailable				Available Mame installations :
+
+	confirmRemoveConfTitle			Retirer %s de la configuration
+	confirmRemoveConf				Etes vous sur de vouloir retirer %s de la configuration ?

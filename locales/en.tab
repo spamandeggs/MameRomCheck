@@ -1,0 +1,78 @@
+en
+	add					Add
+	edit				Edit
+	del					Remove
+	run					Run Mame
+	romdirUpdate		Update
+	romsetRun			Run with %s
+	romsetVerify		Verify in %s
+	romsetVerifyAll		Verify all in %s
+	romsetMameNone		select a release
+	ok					Ok
+	cancel				Cancel
+	saveConfig			Save
+	guess				guess release
+	colName				Name
+	colDescription		Description
+	colStatus			Status
+	colDriver			Driver
+	colRommatch			Match
+	colRomscount		Roms
+	colPath				Path
+	colVersion			Version
+	colSize				Size
+	colComment			Comment
+	colWarning			Warning
+	colError			Error
+	colCRC				CRC md5
+	
+	addMameTitle					Add a Mame installation
+	editMameTitle					Edit a Mame installation
+	
+	mameExeFrameLabel				Mame releases :
+	romdirFrameLabel				Romset folders :
+	romsetsFrameLabel				%s Romsets (%s) :
+	romsetFrameLabel				Romset %s, dir %s :
+	
+	addRomdirTitle					Add a romset folder
+	EditRomdirTitle					Edit a romset folder
+	
+	addName							Name :
+	addPath							Path :
+	addVersion						Version :
+
+	addPathTitleMame				Select a Mame runtime
+	addPathTitleRomdir				Select a romset folder
+	
+	errorNameEmptyTitle				No name given
+	errorNameEmptyMame				Please give a name to this installation.
+	errorNameEmptyRomdir			Please give a name to this romset folder.
+	
+	errorNameExistTitle				This name already exists
+	errorNameExistMame				Please give another name to this installation.
+	errorNameExistRomdir			Please give another name to this romset folder.
+
+	errorArgNotString				%s must be a string.
+	errorArgNotExist				This element does not exist.
+
+	errorPathExistTitle				This path already exists
+	errorPathExistMame				This Mame installation already exists in the list.
+	errorPathExistRomdir			This romset folder already exists in the list.
+	
+	errorPathEmptyTitle				No path given
+	errorPathEmptyMame				Please set a path to this installation.
+	warningNameEmptyMameApi			Please set a path to this installation if you wish to save it later.
+	errorPathEmptyRomdir			Please select a romset folder.
+	
+	errorPathWrongTitle				Wrong path
+	errorPathWrong					This path does not exist
+	
+	errorMameNone					define at least one Mame installation.
+	errorMameUnknown				Unknown Mame installation : %s.
+	errorMameType					Wrong type. Mame installation argument must be a string, an integer or a mame instance.
+	errorMameIndex					Mame installation index is wrong. value must be between 0 and %s.
+	
+	infoMameAvailable				Available Mame installations :
+	
+	confirmRemoveConfTitle			Remove %s from configuration
+	confirmRemoveConf				Are you sure to remove %s from the configuration ?
