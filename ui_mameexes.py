@@ -96,7 +96,7 @@ class UI_mameexes(ttk.Frame) :
 		# update source dict
 		# add
 		if self.mameExeInst == None :
-			Mame(nmep,newMameExeName,self.newMameExeVersion.get())
+			self.mameExeActive = Mame(nmep,newMameExeName,self.newMameExeVersion.get())
 			tag = self.mameExeTree.insert('', 'end', text=newMameExeName, tags=self.mameExeTags)
 		# edit
 		else :
@@ -108,8 +108,10 @@ class UI_mameexes(ttk.Frame) :
 			self.mameExeTree.item(tag,text=newMameExeName)
 			
 		self.mameExeTree.set(tag,'path',nmep)
-		self.mameExeTree.set(tag,'version',self.newMameExeVersion.get())	
+		self.mameExeTree.set(tag,'version',self.newMameExeVersion.get())
 		
+		populateTree(self.romdirTree,Romdir.getall('item'),self.romdirCols,self.romdirTags)
+
 		self.treetag = None
 		self.mameExeAddDialogClose()
 

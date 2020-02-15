@@ -80,12 +80,13 @@ class UI(UI_romdirs) :
 		# self.romdirTreeFrame = ttk.Frame(self.romdirFrame)
 		romdirTreeLabel = ttk.Label(self.mameExeFrame, text=cfg.txt['romdirFrameLabel'])
 		
-		treecols = odict({
+		self.romdirHeaders = odict({
 			'name' : cfg.txt['colName'],
 			'path' : cfg.txt['colPath'],
 		})
+		self.romdirCols = list(self.romdirHeaders.keys())
 		self.romdirTags = ['romdir']
-		self.romdirTree = buildTree(self.mameExeFrame,Romdir.getall('item'),treecols,self.romdirTags)
+		self.romdirTree = buildTree(self.mameExeFrame,Romdir.getall('item'),self.romdirHeaders,self.romdirTags)
 		self.romdirTree.bind('<ButtonRelease-1>', self.romdirTreeClick)
 		# background='#...' definitely DOES NOT WORK for Treeview items on windows 10
 		# will just silently fooling you.
@@ -109,7 +110,6 @@ class UI(UI_romdirs) :
 		
 		treecols = odict({
 			'name' : cfg.txt['colName'],
-			'tags' : cfg.txt['colName'],
 			'description' : cfg.txt['colDescription'],
 			# 'status' : cfg.txt['colStatus'],
 			'driver' : cfg.txt['colDriver'],
