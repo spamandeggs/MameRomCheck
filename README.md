@@ -60,10 +60,17 @@ The user interface will open
 #### important 
 - when you close the application, you should see the python console. Type :
 ```
-task.stop()
+task.info()
+```
+if the tasks manager is stopped. you can
+```
 exit()
 ```
-to exit a little thread manager the project uses. If you don't, the python console will hang and you'll need to kill the python process from the task manager to close it.
+else wait a bit, the console willl warn you when it's finished. or you can
+```
+task.stop()
+```
+then leave. If you don't, the python console will hang and you'll need to kill the python process from the task manager to close it.
 
 ### API
 ```
