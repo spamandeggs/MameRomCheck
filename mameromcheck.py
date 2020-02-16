@@ -1,11 +1,31 @@
-# python373
+# python3.73
+# coding=utf-8
+'''
+Mame Rom Check
+
+Copyright 2020 Jérôme Mahieux
+
+This file is part of Mame Rom Check.
+
+Mame Rom Check is free software: you can redistribute it and/or 
+modify it under the terms of the GNU General Public License as 
+published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+Mame Rom Check is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Mame Rom Check. If not, see http://www.gnu.org/licenses/.
+'''
+
 import os
 from tasks import *
-# import threading
-# from threading import active_count as activetasks
 from xml.dom import minidom
 from collections import OrderedDict as odict
-import weakref
+# import weakref
 
 from mf3parse import mfl2dict, mfl2Odict, dict2mfl
 
@@ -19,8 +39,7 @@ def getlocales(locale) :
 	else :
 		print('locale file %s missing, use english.'%(locale))
 	return loc
-
-		
+	
 def guessVersion(pth) :
 	os.chdir(os.path.dirname(pth))
 	runmame = [ pth, '-help' ]
@@ -327,15 +346,6 @@ class Romset() :
 		if mameInst :
 			mameInst.verify(self)
 
-	def __verify(self,mameExeName=0) :
-		# p = Process(target=self.__verify, args=(self.name,mameExeName,))
-		
-		# p = threading.Thread(target=test, args=('un','deux'))
-		p = threading.Thread(target=self.__verify, args=('mameExeName',))
-		p.start()
-		# p.join()
-		return p
-	
 	# mame -listxml self.name
 	# generates self.mame[version] fields
 	def verify(self,mameExeName=0) :
@@ -446,7 +456,7 @@ class Romset() :
 				# print(name, v['crc'], compat['romset'][name])
 			
 			compat['rommatch'] = '%s/%s'%(len(self.roms),len(roms))
-			
+		
 			# print('descr  : %s'%self.description)
 			# print('driver : %s'%self.driver)
 			# print('match  : %s'%self.rommatch)
@@ -652,9 +662,15 @@ class Mame(MameCommon) :
 	
 	@classmethod
 	def list(cls) :
-		for inst in cls.__members :
-			print(inst.name,inst.version,inst.path)
-	
+		print('\nMame Releases :\n')
+		linesep = ' '+'-'*124
+		print(linesep)
+		print( ' | '.join(('','id'.ljust(2),'Name'.ljust(21),'Version'.ljust(8),'Path'.ljust(80),'')) )
+		print(linesep)
+		for i,inst in enumerate(cls.__members) :
+			print( ' | '.join(('',str(i).ljust(2),inst.name.ljust(21),inst.version.ljust(8),inst.path.ljust(80),'')) )
+		print(linesep)
+			
 	@classmethod
 	def remove(cls,id) :
 		rtn = super().remove(id,cls.__members)
@@ -756,9 +772,16 @@ class Romdir(MameCommon) :
 		
 	@classmethod
 	def list(cls) :
-		for inst in cls.__members :
-			print(inst.name,inst.path)
-
+		print('\nRomsets Folders:\n')
+		linesep = ' '+'-'*113
+		print(linesep)
+		print( ' | '.join(('','id'.ljust(2),'Name'.ljust(21),'Path'.ljust(80),'')) )
+		print(linesep)
+		for i,inst in enumerate(cls.__members) :
+			# print(inst.name,inst.version,inst.path)
+			print( ' | '.join(('',str(i).ljust(2),inst.name.ljust(21),inst.path.ljust(80),'')) )
+		print(linesep)
+		
 	@classmethod
 	def remove(cls,id) :
 		rtn = super().remove(id,cls.__members)
@@ -799,14 +822,12 @@ class Romdir(MameCommon) :
 		# when populate() is called from cfg,
 		# it inputs romset informations
 		if knowfields : 
-			print('knowfields',type(knowfields),len(knowfields))
-			print(len(knowfields[0]['romsets']))
 			romsetsfields = knowfields[0]['romsets']
 			for rsetname,rsetconf in romsetsfields.items() :
 				if rsetname in self.__romset :
 					self.__romset[rsetname].updateFromConfig(rsetconf)
 				else :
-					print('MISSING !',rsetname,r)
+					print('MISSING !',rsetname,type(rsetname),rsetconf['path'])
 					
 	def __dirzip(self) :
 		romsets = []
@@ -822,6 +843,7 @@ class Romdir(MameCommon) :
 		for rsetname, rset in self.romset.items() :
 			task.add('verify.%s'%rsetname,rset.verify,mameExeName)
 	
+	# task report callback
 	def __isdone(self,*args) :
 		tskbasename,trainsta,count,total,since,duration = args
 		print('verified %s romsets in %.3f secs.'%(count,duration))
@@ -1041,7 +1063,8 @@ for lf in files :
 		config = localefile.readlines()
 		localefile.close()
 		locales[locale] = mfl2dict(config)[0][locale]
-task = Tasks()
+task = Tasks(eco = True)
+
 cfg = Config()
 cfg.load()
 

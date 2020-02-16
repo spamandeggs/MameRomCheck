@@ -1,4 +1,26 @@
-# python373
+# python3.73
+# coding=utf-8
+'''
+Mame Rom Check
+
+Copyright 2020 Jérôme Mahieux
+
+This file is part of Mame Rom Check.
+
+Mame Rom Check is free software: you can redistribute it and/or 
+modify it under the terms of the GNU General Public License as 
+published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+Mame Rom Check is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Mame Rom Check. If not, see http://www.gnu.org/licenses/.
+'''
+
 from ui_romdirs import *
 from time import sleep
 
@@ -35,7 +57,7 @@ class UI(UI_romdirs) :
 			'blank' : 'blank16x16.gif',
 			'new' : 'new16x16.gif',
 			'missing' : 'missing16x16.gif',
-		}
+			}
 		for k,v in icons.items() :
 			self.icons[k] = ImageTk.PhotoImage(Image.open(os.path.join(iconpth,v)))
 		
@@ -46,6 +68,7 @@ class UI(UI_romdirs) :
 		
 		self.mameExeActive = None
 		self.romdirActive = None
+		self.romsetActive = None
 		
 		## widgets
 		
@@ -59,7 +82,7 @@ class UI(UI_romdirs) :
 			'name' : cfg.txt['colName'],
 			'version' : cfg.txt['colVersion'],
 			'path' : cfg.txt['colPath'],
-		})
+			})
 		self.mameExeTags = ['mameexe']
 		self.mameExeTree = buildTree(self.mameExeFrame,Mame.getall('item'),treecols,self.mameExeTags)
 		self.mameExeTree.bind('<ButtonRelease-1>', self.mameExeTreeClick)
@@ -83,7 +106,7 @@ class UI(UI_romdirs) :
 		self.romdirHeaders = odict({
 			'name' : cfg.txt['colName'],
 			'path' : cfg.txt['colPath'],
-		})
+			})
 		self.romdirCols = list(self.romdirHeaders.keys())
 		self.romdirTags = ['romdir']
 		self.romdirTree = buildTree(self.mameExeFrame,Romdir.getall('item'),self.romdirHeaders,self.romdirTags)
@@ -99,7 +122,6 @@ class UI(UI_romdirs) :
 		romdirEdit = ttk.Button(romdirButtonFrame, text=cfg.txt['edit'], command=self.romdirEditDialog)
 		romdirDel = ttk.Button(romdirButtonFrame, text=cfg.txt['del'], command=self.romdirDelDialog)
 		
-		save = ttk.Button(self, text=cfg.txt['saveConfig'], command=self.saveConfig)
 		
 		################
 		# ROMSETS view #
@@ -163,7 +185,9 @@ class UI(UI_romdirs) :
 		self.romsetRunButton = ttk.Button(self, text=cfg.txt['romsetMameNone'], command=self.romsetRun)
 		self.romsetRunButton.state(['disabled'])
 		
-		# COMMON
+		###############
+		# COMMON/MAIN #
+		###############
 		save = ttk.Button(self, text=cfg.txt['saveConfig'], command=self.saveConfig)
 
 		#########################
@@ -249,6 +273,7 @@ class UI(UI_romdirs) :
 		
 		self.romsetRunButton.grid(column=romsetcol, row=2, sticky=(N,S,E,W))
 		
+		# COMMON/MAIN
 		save.grid(column=0, row=6, sticky=(N,S,E,W))
 		
 		print(self)
@@ -307,9 +332,9 @@ class UI(UI_romdirs) :
 	def __romsetUpdateLine(self,tkid,rset) :
 		self.romsetsTree.set(tkid,'description',rset.description)
 		self.romsetsTree.set(tkid,'driver',rset.driver)
-		self.romsetsTree.set(tkid,'rommatch',rset.rommatch)
+		self.romsetsTree.set(tkid,'rommatch',rset.rommatch) # todo
 		self.romsetsTree.set(tkid,'size',rset.size)
-		self.romsetsTree.set(tkid,'comment',tkid) #rset.comment)
+		self.romsetsTree.set(tkid,'comment',rset.comment)
 		self.romsetsTree.set(tkid,'romscount',rset.romscount)
 		self.romsetsTree.set(tkid,'warnings',rset.warnings)
 		self.romsetsTree.set(tkid,'error',rset.error)

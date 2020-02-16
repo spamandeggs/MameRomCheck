@@ -1,21 +1,24 @@
-## mf3parse.py
-# ensemble de fonctions qui convertissent
-# une liste readlines() raw en un dictionnaire python,
-# et un dictionnaire python en une liste readlines() raw 
-# python3
-# 11/02/2016
-# 24/10/2017 sauts de lignes apres un nest, maj mfl2Odict, cleaning
-
+# python3.73
+# coding=utf-8
 '''
-# tests depuis la console :
-p = "D:\\documents\\projets\\3d\\bge\\mainframe\\mf4\\webui\\data\\lib\\testparsing.mf3"
-f = open(p,'r')
-cfg = f.readlines()
-f.close()
-from mf3parse import *
+Mame Rom Check
 
-d,s = mfl2Odict(cfg)
-print(d)
+Copyright 2020 Jérôme Mahieux
+
+This file is part of Mame Rom Check.
+
+Mame Rom Check is free software: you can redistribute it and/or 
+modify it under the terms of the GNU General Public License as 
+published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+Mame Rom Check is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Mame Rom Check. If not, see http://www.gnu.org/licenses/.
 '''
 
 from collections import OrderedDict as Odict
@@ -27,7 +30,7 @@ except :
 
 nestaslist = [ 'blocks','mf3','ifthen','reactions','mapto','mapto2','atinit','atend','atloop','atmin','atmax' ]	
 
-# tabulation count + line instruction
+# returns tabulation count and a stripped line
 def gettabulation(line) :
 	# print('mf3Line : \n %s\n %s\n %s'%(line,len(line),type(line)))
 	
@@ -57,7 +60,7 @@ def mf3Line(line) :
 	# blank line actually
 	if line == '' : return tabs,''
 	
-	# removes inner lines tab duplis and start/end blanks
+	# removes inner lines tab duplis
 	while '\t\t' in line : line = line.replace('\t\t','\t')
 
 	# ignore eol comments
@@ -77,123 +80,6 @@ def mf3Line(line) :
 	if line in [ '', '\t']  or line[0] == '#' or line [0:2] == '//' : return tabs,''
 	
 	return tabs,line
-
-# converts a list of mf3 lines to a dictionnary
-def LASTmfl2dict(cfg,dico=False,lasttab=0,pointer=-1) :
-	# orderedkeys = [ 'if' ,'elif','exec','ifthen','then','else','set','trace','mapto','mapto2','atinit','atend','atloop' ]
-	orderedkeys = [ 'if' ,'elif','exec','ifthen','then','else','set','trace' ]
-	if dico == False : dico = {}
-	try :
-		typ = 'dict' if type(dico) == dict else 'list'
-				
-		while pointer+1 < len(cfg) :
-			
-			pointer += 1
-			line = cfg[pointer]
-			tab = 0
-			nexttab = 0
-			tab, line = mf3Line(cfg[pointer])
-			if line == '' : continue
-			if pointer+1 < len(cfg) : nexttab, nextline = mf3Line(cfg[pointer+1])
-			else : nexttab = tab		
-
-			# print(pointer,tab,lasttab)
-			
-			if tab == lasttab :
-				#print('%s.%s.%s.%s.%s'%(' '*tab,pointer+1,line,lasttab,line == 'if'))
-				
-				# a prop with a value
-				if '\t' in line :
-					line,v = line.split('\t')
-					line = line.strip()
-					try : line = int(line)
-					except : pass
-					v = findType(v.strip())
-					if typ == 'dict' :
-						dico[line] = v
-					else :
-						dico.append({line:v})
-				# a list item
-				elif tab >= nexttab :
-					if typ == 'dict' :
-						try : line = int(line)
-						except : pass
-						dico[line] = 0
-					else :
-						line = findType(line)
-						dico.append(line)
-				# a  nested list or dict 
-				else :
-
-					if line[-2:] == '[]' or line in [ 'if' ,'elif','exec','ifthen','then','else','set','trace' ] :
-					# if line[-2:] == '[]' or line in orderedkeys :
-						styp = 'list'
-						line = line.replace('[]','')
-						try : line = int(line)
-						except : pass
-						if typ == 'dict' :
-							dico[line] = []
-						else :
-							dico.append({line:[]})
-					else :
-						try : line = int(line)
-						except : pass
-						styp = 'dict'
-						if typ == 'dict' :
-							dico[line] = {}
-						else :
-							dico.append({line:{}})
-			  
-			elif tab < lasttab :
-				return dico,pointer-1
-			
-			elif tab > lasttab :
-				#print('%s.%s.%s.%s'%(' '*tab,pointer+1,line,lasttab))
-				#if typ == 'lst' :
-				#	dico[lastline] = []
-				#else :
-				#	dico[lastline] = {}
-					
-
-				#
-				if styp == 'list' :
-					#print('%sread list'%(' '*tab))
-					subdico,pointer = mfl2dict(cfg,[],lasttab+1,pointer-1)
-					if subdico == False : return False,pointer
-					#print(subdico)
-					#print(type(dico))
-					#print(dico)
-					#print(lastline)
-					if typ == 'dict' : 
-						#print('%sfeed dict with list'%(' '*tab))
-						dico[lastline].extend(subdico)
-					else :
-						#print('%sfeed list with list'%(' '*tab))
-						dico[-1][lastline] = subdico
-				else :
-					#print('%sread dict'%(' '*tab))
-					subdico,pointer = mfl2dict(cfg,{},lasttab+1,pointer-1)
-					if subdico == False : return False,pointer
-					#print(subdico)
-					#print(type(dico),typ)
-					#print(dico)
-					#print(lastline)
-					if typ == 'dict' : 
-						#print('%sfeed dict with dict'%(' '*tab))
-						dico[lastline].update(subdico)
-					else :
-						#print('%sfeed list with dict'%(' '*tab))
-						dico[-1][lastline] = subdico
-						
-				tab -= 1
-
-			#print('%s%s'%(' '*tab,dico))
-			lastline = line
-			lasttab = tab
-
-		return dico,pointer
-	except :
-		return False,pointer
 
 def mfl2dict(cfg,dico=False,lasttab=0,pointer=-1) :
 	if dico == False : dico = {}
@@ -326,8 +212,8 @@ def mfl2dict(cfg,dico=False,lasttab=0,pointer=-1) :
 
 ## c'est la fonction parser utilisée en entrée (juillet 2018)
 def mfl2Odict(cfg,dico=False,lasttab=0,pointer=-1) :
-	if dico == False : dico = Odict()
-	# try :
+	if not(dico) : dico = Odict()
+	
 	typ = 'dict' if type(dico) == Odict else 'list'
 	
 	try :
@@ -346,9 +232,9 @@ def mfl2Odict(cfg,dico=False,lasttab=0,pointer=-1) :
 			while nextline == '' and npointer+1 < len(cfg) :
 				npointer += 1
 				nexttab, nextline = mf3Line(cfg[npointer])
-				if nextline == '' :
-					nexttab = tab
-					continue
+				# if nextline == '' :
+					# nexttab = tab
+					# continue
 			# print(pointer,line,tab,nexttab)
 			
 			# is a peer of the last element
@@ -359,25 +245,25 @@ def mfl2Odict(cfg,dico=False,lasttab=0,pointer=-1) :
 				if '\t' in line :
 					line,v = line.split('\t')
 					line = line.strip()
-					try : line = int(line)
-					except : pass
+					# try : line = int(line)
+					# except : pass
 					v = findType(v.strip())
 					if typ == 'dict' :
 						dico[line] = v
 					else :
 						dico.append({line:v})
-				# not a nest, but a word alone
+				# lone word. not a nest since it has no childs
 				elif tab >= nexttab :
 					# if nest is a dict, default value 
 					if typ == 'dict' :
-						try : line = int(line)
-						except : pass
+						# try : line = int(line)
+						# except : pass
 						dico[line] = 0
 					# if nest is a list, append
 					else :
 						line = findType(line)
 						dico.append(line)
-				# a  nested list or dict, create it
+				# lone word as a  nested list or dict, create
 				else :
 					if line[-2:] == '[]' :
 						line = line[:-2]
@@ -395,8 +281,8 @@ def mfl2Odict(cfg,dico=False,lasttab=0,pointer=-1) :
 							dico.append({line:[]})
 					# nest is a dict
 					else :
-						try : line = int(line)
-						except : pass
+						# try : line = int(line)
+						# except : pass
 						nesttype = 'dict'
 						if typ == 'dict' :
 							dico[line] = Odict()
