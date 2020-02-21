@@ -66,6 +66,7 @@ class AppWindow(Gtk.ApplicationWindow):
 			'romdirTree' : 'romdirFrameLabel',
 			'romsetsTree' : 'romsetsFrameLabel',
 			'romsetTree' : 'romsetFrameLabel',
+			'tasks' : 'tasksFrameLabel',
 		}
 		self.lbl = {}
 		for k,v in self.labels.items() :
@@ -75,20 +76,7 @@ class AppWindow(Gtk.ApplicationWindow):
 				# angle=25, 
 				)
 		
-		# self.add(self.bt['run'])
-		# print(dir(self.bt['run'].props))
-		# label.set_text(text)
-		# >>> txt = label.get_text()
-		
-		
 		self.box = Gtk.Box(spacing=6)
-		# self.box2 = Gtk.Box(spacing=6)
-		# self.grid.add(self.box)
-		# self.grid.attach(self.box2,0,1,1,1)
-		# self.box.pack_start(self.bt['run'], True, True, 0)
-		# self.box.pack_start(self.bt['add'], True, True, 0)
-		# self.box2.pack_start(self.bt['edit'], True, True, 0)
-		# self.box2.pack_start(self.bt['del'], True, True, 0)
 		
 		########
 		# MAME #
@@ -223,6 +211,13 @@ class AppWindow(Gtk.ApplicationWindow):
 		for btname in ['save'] :
 			mainBt.add(self.bt[btname])		
 		
+		#########
+		# TASKS #
+		#########
+		
+		self.tasks = odict()
+		self.tasksbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+		
 		########
 		# GRID #
 		########
@@ -241,7 +236,12 @@ class AppWindow(Gtk.ApplicationWindow):
 		self.grid.attach(self.lbl['romdirTree'],col,next(row),1,1)
 		self.grid.attach(self.romdirTree,col,next(row),1,1)
 		self.grid.attach(romdirBt,col,next(row),1,1)
-
+		
+		self.tasksbox.pack_start(self.lbl['tasks'], True, True, 0)
+		self.grid.attach(self.tasksbox,col,next(row),1,1)
+		
+		self.grid.attach(mainBt,0,next(row),1,1)
+		
 		col += 1
 		row = nextrow(0)
 		self.grid.attach(self.lbl['romsetsTree'],col,next(row),1,1)
@@ -261,9 +261,6 @@ class AppWindow(Gtk.ApplicationWindow):
 		self.romsetTreeScroll.add(self.romsetTree)
 		row = nextrow(5)
 		self.grid.attach(romsetBt,col,next(row),1,1)
-
-		
-		self.grid.attach(mainBt,0,next(row),1,1)
 		
 		# keep instance upon which tasks are running
 		self.mamePending = None
@@ -280,7 +277,8 @@ class AppWindow(Gtk.ApplicationWindow):
 		## romdir
 		for d in Romdir.getall() :
 			self.romdirModel.append([d.name,d.path])
-		
+	
+	## all tree actions
 	def get_tree_cell_pixbuf(self, col, cell, model, iter, fieldid):
 		cell.set_property('pixbuf', self.ico[model.get_value(iter, fieldid)])
 
@@ -413,10 +411,10 @@ class AppWindow(Gtk.ApplicationWindow):
 				self.bt['editD'].set_sensitive(False)
 				self.bt['delD'].set_sensitive(False)
 		
-			print('active mame   %s'%Mame.getActive())
+			print('active mame	 %s'%Mame.getActive())
 			print('active romdir %s'%Romdir.getActive())
 			print('active romset %s'%Romset.getActive())
-			print('active rom    %s'%cfg.activeRom)
+			print('active rom	 %s'%cfg.activeRom)
 			
 			# print('selection mode %s'%selection.props.mode)
 			# print(dir(self.bt['runR'].props))
@@ -435,9 +433,14 @@ class AppWindow(Gtk.ApplicationWindow):
 			if self.bt['runR'].get_sensitive() : txt = cfg.txt['romsetRun']%(Mame.getActive().name)
 			else : txt = cfg.txt['romsetMameNone']
 			self.bt['runR'].set_label(txt)
-
-	def romset_verified(self,taskname,romset) :
-		if self.romdirPending == Romdir.getActive() :
+	
+	## display callbacks
+	def romset_verified(self,tskname,romset) :
+		flds = tskname.split('\\')
+		tskname = '\\'.join(flds[:-1])
+		romsetname = flds[-1]
+		self.tasks_update(tskname)
+		if Romdir.getActive() == self.tasks[tskname]['romdir'] :
 			for r in self.romsetsModel :
 				if r[0] == romset.name :
 					for col,fld in enumerate(cfg.fields['romsets']['public']) :
@@ -456,7 +459,63 @@ class AppWindow(Gtk.ApplicationWindow):
 	def all_romset_verified(self,*args) :
 		tskbasename,status,count,total,since,duration = args
 		print('all_romset_verified : %s/%s %s'%(count,total,status))
+		self.tasks_done(tskbasename,since,duration)
 	
+	## display callbacks subs about progressbars
+	def tasks_add(self,mameinst,romdirinst,tsktype,total,*args) :
+		# give it a unique temporary name.
+		tskname = cfg.tasksname(tsktype,mameinst.name,romdirinst.name)
+		tsk = self.tasks[tskname] = {
+				'progress' : 0,
+				'total' : total,
+				'mame' : mameinst,
+				'romdir' : romdirinst,
+			}
+		
+		tsk['bar'] = Gtk.ProgressBar()
+		if tsktype == 'verify' :
+			pbartxt = cfg.txt['task.%s.wait'%tsktype]%(0,total,romdirinst.name,mameinst.name)
+		tsk['bar'].set_text(pbartxt)
+		tsk['bar'].set_show_text(True)
+		tsk['bar'].set_fraction(0.0)
+		self.tasksbox.pack_start(tsk['bar'], True, True, 0)
+		tsk['bar'].show()
+
+		# no active task, run it immediately
+		if tskname == list(self.tasks.keys())[0] :
+			self.tasks_run(tskname)
+		
+	def tasks_run(self,tskname,*args) :
+		tsktype = tskname.split('\\')[0]
+		if tsktype == 'verify' :
+			print('run %s'%tskname)
+			m = self.tasks[tskname]['mame']
+			rd = self.tasks[tskname]['romdir']
+			rd.verify(m.name,self.romset_verified,self.all_romset_verified)
+		
+	def tasks_update(self,tskname,*args) :
+		tsktype = tskname.split('\\')[0]
+		tsk = self.tasks[tskname]
+		tsk['progress'] += 1
+		v = tsk['progress']/tsk['total']
+		tsktype = tskname.split('\\')[0]
+		pbartxt = cfg.txt['task.%s'%tsktype]%(tsk['progress'],tsk['total'],tsk['romdir'].name,tsk['mame'].name)
+		tsk['bar'].set_text(pbartxt)
+		tsk['bar'].set_fraction(v)
+	
+	def tasks_done(self,tskname,*args) :
+		tsktype = tskname.split('\\')[0]
+		tsk = self.tasks[tskname]
+		pbartxt = cfg.txt['task.%s.done'%tsktype]%(tsk['progress'],tsk['total'],tsk['romdir'].name,tsk['mame'].name)
+		tsk['bar'].set_text(pbartxt)
+		print('task.%s verif : %s/%s'%(tskname,self.tasks[tskname]['progress'],self.tasks[tskname]['total']))
+		tsk['bar'].set_sensitive(False)
+		del(self.tasks[tskname])
+		if len(self.tasks) :
+			nexttaskname = list(self.tasks.keys())[0]
+			self.tasks_run(nexttaskname)
+			
+	## all buttons actions
 	def button_clicked(self, widget,btname):
 		print('button %s clicked'%(btname))
 		if btname == 'run' :
@@ -484,13 +543,13 @@ class AppWindow(Gtk.ApplicationWindow):
 			self.romsetnames = [ row[0] for row in self.romsetsModel ]
 			s.verify(MameName)
 			
-			
+		# a task is defined by the implicated instances and an action
+		# self.tasks_add(Mame inst,Romdir inst,task.taskname,args)
 		elif btname == 'verifyAll' :
-			MameName = Mame.getActive().name
+			m = Mame.getActive()
 			rd = Romdir.getActive()
-			self.romdirPending = rd
-			print('ask to run all romsets in %s with %s'%(rd.name,MameName))
-			rd.verify(MameName,self.romset_verified,self.all_romset_verified)
+			print('ask to verify all romsets in %s with %s'%(rd.name,m.name))
+			self.tasks_add(m,rd,'verify',len(self.romsetsModel))
 			
 		elif btname == 'runR' :
 			MameName = Mame.getActive().name

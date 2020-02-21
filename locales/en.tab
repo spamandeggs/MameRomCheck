@@ -34,6 +34,7 @@ en
 	romdirFrameLabel				Romset folders :
 	romsetsFrameLabel				%s Romsets (%s) :
 	romsetFrameLabel				Romset %s, dir %s :
+	tasksFrameLabel					Tasks :
 	
 	addRomdirTitle					Add a romset folder
 	EditRomdirTitle					Edit a romset folder
@@ -77,3 +78,7 @@ en
 	
 	confirmRemoveConfTitle			Remove %s from configuration
 	confirmRemoveConf				Are you sure to remove %s from the configuration ?
+	
+	task.verify.wait				%s/%s romsets in %s to verify with %s
+	task.verify						%s/%s romsets in %s verified with %s
+	task.verify.done				%s/%s romsets verified in %s with %s

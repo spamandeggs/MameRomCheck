@@ -177,7 +177,7 @@ class Tasks() :
 			try :
 				args = list(self.queue.get_nowait())
 				tskname,func,args,kwargs = args
-				tskbasename = tskname.split('.')[0] # for tasks trains
+				tskbasename = '\\'.join( tskname.split('\\')[:-1] ) # for tasks trains
 				tskcheck = self.__left.pop(0)
 				
 				if not(self.__stoppending) :
@@ -235,7 +235,7 @@ class Tasks() :
 				for t in self.__task :
 					if t not in threading.enumerate() :
 						tskname = t.getName()
-						tskbasename = tskname.split('.')[0]
+						tskbasename = '\\'.join( tskname.split('\\')[:-1] ) # for tasks trains
 						if self.__verbose : print("task '%s' ended."%tskname)
 						# train
 						if tskbasename in self.__reports :
@@ -249,7 +249,9 @@ class Tasks() :
 						tasknext.append(t)
 				self.__task = tasknext
 			
-			if self.__polls and perf_counter() - self.__pollslast >= self.__pollslatency :
+			# train task completion for callback.
+			
+			if self.__polls and (perf_counter() - self.__pollslast >= self.__pollslatency or not(self.__status) ):
 				pollnext = []
 				for tskbasename in self.__polls :
 					rep = self.__reports[tskbasename]

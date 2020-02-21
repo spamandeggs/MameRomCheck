@@ -946,10 +946,13 @@ class Romdir(MameCommon) :
 		if __name__ == '__main__' :
 			traincallback = self.__verify_alldone
 			callback = self.__verify_romset_result
-		task.report('verify',len(self.romset),traincallback)
+		m = Mame.get(mameExeName)
+		tskbasename = cfg.tasksname('verify',m.name,self.name)
+		task.report(tskbasename,len(self.romset),traincallback)
 		for rsetname, rset in self.romset.items() :
-			task.add('verify.%s'%rsetname,rset.verify,mameExeName,callback=callback)
-	
+			task.add('%s\\%s'%(tskbasename,rsetname),rset.verify,mameExeName,callback=callback)
+		return tskbasename
+		
 	def __verify_romset_result(self,taskname,romset) :
 		print('%s : %s %s'%(taskname,romset.filestatus,romset.status))
 		
@@ -1188,7 +1191,12 @@ class Config() :
 		cfgfile = open(cfgpath,'w',encoding='utf8')
 		for l in cfglines : cfgfile.write(l)
 		cfgfile.close()
+	
+	def tasksname(self,tsktype,*args) :
+		if tsktype == 'verify' :
+			return 'verify\\%s\\%s'%(args[0],args[1])
 
+	
 def checkxml(romsetname) :
 
 	runmame = [ os.path.join(pth_mame,mame_exe) ]
