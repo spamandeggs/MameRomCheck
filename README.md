@@ -1,7 +1,7 @@
 # MameRomCheck
 yet another tool to manage Mame Roms - ui and api
 
-it has a gui (tkinter) and an api. This is very early release, but non destructive,
+it has a gui (tkinter or gtk) and an api. This is very early release, but non destructive,
 since it only get informations and dont touch anything (for now..)
 
 Goal is toProvide a 'simple' user interface and a python api to get efficient romset listing inside Mame
@@ -22,7 +22,7 @@ is really playable or not / to only keep the playable romsets in my roms directo
 - Python 3.7.3
 - PIL (pip install pillow)
 
-this should work in other context, provided you use a Python 3.7+ python release, but didn't get the chance to test yet.
+this should work in other context, provided you use a Python 3.7+ release, but didn't get the chance to test yet.
 
 ### installation :
 - unzip master and open a cmd shell.
@@ -33,9 +33,16 @@ this should work in other context, provided you use a Python 3.7+ python release
 - copy 7z.exe, 7z.dll and License.txt from in the ./bin directory
 - cd to the top level of the directory then :
 ```
-python -i ui.py
+python ui.py
 ```
-The user interface will open
+The tkinter user interface will open
+
+OR
+
+```
+python gtk.py
+```
+The GTK user interface will open
 
 #### add Mame installations
 - click the add button under the Mame releases area and browse to your Mame64.exe runtime, 

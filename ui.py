@@ -57,6 +57,9 @@ class UI(UI_romdirs) :
 			'blank' : 'blank16x16.gif',
 			'new' : 'new16x16.gif',
 			'missing' : 'missing16x16.gif',
+			'dot_white' : 'dot_white16x16.gif',
+			'dot_red' : 'dot_red16x16.gif',
+			'dot_green' : 'dot_green16x16.gif',
 			}
 		for k,v in icons.items() :
 			self.icons[k] = ImageTk.PhotoImage(Image.open(os.path.join(iconpth,v)))
@@ -141,14 +144,16 @@ class UI(UI_romdirs) :
 			'romscount' : cfg.txt['colRomscount'],
 			'warnings' : cfg.txt['colWarning'],
 			'error' : cfg.txt['colError'],
-		})
+			})
 		self.romsetsCols = list(treecols.keys())
 		self.romsetsTags = ['romset']
 		self.romsetsTree = buildTree(self.romsetsFrame,{},treecols,self.romsetsTags)
 		self.romsetsTree.bind('<ButtonRelease-1>', self.romsetsTreeClick)
-		self.romsetsTree.tag_configure('romset', image=self.icons['blank'])
+		self.romsetsTree.tag_configure('unknown', image=self.icons['blank'])
 		self.romsetsTree.tag_configure('new', image=self.icons['new'])
 		self.romsetsTree.tag_configure('missing', image=self.icons['missing'])
+		self.romsetsTree.tag_configure('playable', image=self.icons['dot_green'])
+		self.romsetsTree.tag_configure('wrong', image=self.icons['dot_red'])
 		
 		romsetButtonFrame = ttk.Frame(self.romsetsFrame)
 		self.romsetVerifyButton = ttk.Button(romsetButtonFrame, text=cfg.txt['romsetMameNone'], command=self.romsetVerify)
@@ -400,7 +405,7 @@ class UI(UI_romdirs) :
 		self.romdirActive = Romdir.get(name)
 		print(self.romdirTree.item(tkid))
 		print('%s romsets'%(len(self.romdirActive.romset)))
-		populateTree(self.romsetsTree,self.romdirActive.romset,self.romsetsCols,self.romsetsTags)
+		populateTree(self.romsetsTree,self.romdirActive.romset,self.romsetsCols,self.romsetsTags,self.icons['dot_red'])
 		self.romsetsTreeLabel['text'] = cfg.txt['romsetsFrameLabel']%(self.romdirActive.name,len(self.romdirActive.romset))
 		
 	def romsetsTreeClick(self,event) :

@@ -14,7 +14,8 @@ en
 	guess				guess release
 	colName				Name
 	colDescription		Description
-	colStatus			Status
+	colStatus			''
+	colFilestatus		''
 	colDriver			Driver
 	colRommatch			Match
 	colRomscount		Roms
@@ -22,8 +23,8 @@ en
 	colVersion			Version
 	colSize				Size
 	colComment			Comment
-	colWarning			Warning
-	colError			Error
+	colWarnings			Warnings
+	colError			Errors
 	colCRC				CRC md5
 	
 	addMameTitle					Add a Mame installation

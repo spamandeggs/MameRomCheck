@@ -4,18 +4,27 @@ fr
 	del					Enlever
 	run					Run Mame
 	romdirUpdate		Rafraichir
+	romsetRun			Run with %s
+	romsetVerify		Vérifier avec %s
+	romsetVerifyAll		Tout vérifier avec %s
+	romsetMameNone		select a release
 	ok					Ok
 	cancel				Annuler
 	saveConfig			Enregistrer
 	guess				Deviner cette release
 	colName				Nom
+	colDescription		Description
+	colStatus			''
+	colFilestatus		''
+	colDriver			Driver
+	colRommatch			Match
 	colRomscount		Roms
 	colPath				Chemin
 	colVersion			Version
 	colSize				Taille
 	colComment			Commentaires
-	colWarning			Important
-	colError			Erreur
+	colWarnings			Important
+	colError			Erreurs
 	colCRC				CRC md5
 	
 	addMameTitle					Ajouter une installation Mame

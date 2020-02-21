@@ -23,7 +23,7 @@ along with Mame Rom Check. If not, see http://www.gnu.org/licenses/.
 
 import threading
 from threading import active_count
-from queue import SimpleQueue
+from queue import Queue, SimpleQueue
 from time import sleep, perf_counter
 import subprocess
 
@@ -162,7 +162,14 @@ class Tasks() :
 			print(f'total done    : {len(self.__done)}')
 			print(f'total aborted : {len(self.__aborted)}')
 			print(f'threads       : {active_count()}')
-		
+
+	def __taskwrapper(self,func,tskname,*args,**kwargs) :
+		if 'callback' in kwargs : callback = kwargs.pop('callback')
+		else : callback = False
+		rtn = func(*args,**kwargs)
+		self.__done.append((tskname,[rtn]))
+		if callback : callback(tskname,rtn)
+
 	def __queue(self) :
 		self.statusinfo()
 		while self.__status :
@@ -185,9 +192,18 @@ class Tasks() :
 							rep = self.__reports[tskbasename]
 							if rep['start'] == -1 : 
 								rep['start'] = perf_counter()
-								if self.__verbose : self.info(tskbasename)						
+								if self.__verbose : self.info(tskbasename)	
 							
-						t = threading.Thread(target=func, name=tskname, args=args, kwargs=kwargs)
+						# t = Thread(target=lambda q, arg1: q.put(foo(arg1)), args=(que, 'world!'))
+						# args.insert(self.returnsqueue)
+						# t = threading.Thread(target=lambda q, *args, **kwargs: q.put(func(*args,**kwargs)), name=tskname, args=args, kwargs=kwargs)
+						# t = threading.Thread(target=func, name=tskname, args=args, kwargs=kwargs)
+						
+						if not(args) : args = []
+						args = list(args)
+						args.insert(0,tskname)
+						args.insert(0,func)
+						t = threading.Thread(target=self.__taskwrapper, name=tskname, args=args, kwargs=kwargs)
 						t.start()
 						self.__task.append(t)
 						
@@ -221,7 +237,6 @@ class Tasks() :
 						tskname = t.getName()
 						tskbasename = tskname.split('.')[0]
 						if self.__verbose : print("task '%s' ended."%tskname)
-						self.__done.append((tskname,[]))
 						# train
 						if tskbasename in self.__reports :
 							rep = self.__reports[tskbasename]
@@ -249,6 +264,7 @@ class Tasks() :
 				self.__polls = pollnext
 
 		self.statusinfo()
+		
 
 # inst0 = Something('instance 0')
 # inst1 = Something('instance 1')

@@ -263,7 +263,7 @@ def mfl2Odict(cfg,dico=False,lasttab=0,pointer=-1) :
 					else :
 						line = findType(line)
 						dico.append(line)
-				# lone word as a  nested list or dict, create
+				# lone word as a nested list or dict, create
 				else :
 					if line[-2:] == '[]' :
 						line = line[:-2]
@@ -287,7 +287,8 @@ def mfl2Odict(cfg,dico=False,lasttab=0,pointer=-1) :
 						if typ == 'dict' :
 							dico[line] = Odict()
 						else :
-							dico.append({line:Odict()})
+							
+							dico.append(Odict({line:Odict()}))
 			# end of a nest, return
 			elif tab < lasttab :
 				return dico,pointer-1

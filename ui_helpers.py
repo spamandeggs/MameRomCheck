@@ -46,7 +46,7 @@ def buildTree(parent,datas,columns,tags) :
 	populateTree(tree,datas,headers,tags) 
 	return tree
 
-def populateTree(tree,datas,headers,tags) :
+def populateTree(tree,datas,headers,tags,icon=False) :
 	tree.delete(*tree.get_children())
 	if len(datas.values()) :
 		firstvalue = list(datas.values())[0]
@@ -69,13 +69,15 @@ def populateTree(tree,datas,headers,tags) :
 			for k,v in datas.items() :
 				sid = str(tkid)
 				if hasattr(v,'tags') and getattr(v,'tags') != '' :
-					print('tags ! %s'%getattr(v,'tags'))
+					# print('tags ! %s'%getattr(v,'tags'))
 					thesetags = getattr(v,'tags')
 				else : thesetags = tags
 				tree.insert('',"end",tkid, text=k, tags=thesetags)
 				# id = tree.insert('', 'end', text=k, tags=tags)
 				for k2 in headers[1:] :
 					tree.set(tkid, k2, getattr(v,k2))
+				if icon :
+					tree.set(tkid, k2,'☺')
 				tkid+=1
 	
 	return tree
