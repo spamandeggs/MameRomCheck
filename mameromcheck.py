@@ -262,7 +262,8 @@ class Romset() :
 				if k == 'mame' :
 					for mameversion,mamefields in tmp[k].items() :
 						for mk,mv in mamefields.items() :
-							tmp[k][mameversion][mk] = self.__typemap(mk,mv,cfg.fields['mame']['load'][mk])
+							# tmp[k][mameversion][mk] = self.__typemap(mk,mv,cfg.fields['mame']['load'][mk])
+							tmp[k][mameversion][mk] = self.__typemap(mk,mv,cfg.fields['romsets']['mameload'][mk])
 					
 		self.__description = tmp['description'] # last descr red from a verify(mameversion)
 		self.__roms = tmp['roms']
@@ -594,7 +595,7 @@ class MameCommon() :
 		# print(pths)
 		# print(path in pths)
 		if pthtest in pths :
-			print(cfg.txt['errorPathExistRomdir'])
+			print(cfg.txt['errorPathExist'])
 			return pths.index(pthtest)
 			# ?? with Mame.readonfig as a caller,
 			# ?? Romdir.get() changes the name of the existing dir
@@ -819,6 +820,10 @@ class Mame(MameCommon) :
 		if self.version == '' or nmev != 'unknown' : self.version = nmev
 		if self.name == '' : self.name = nmen
 
+	def fields(self) :
+		flds = [getattr(self,fld) for fld in cfg.fields['mame']['public']]
+		return flds
+
 class Romdir(MameCommon) :
 
 	__members = []
@@ -1014,6 +1019,11 @@ class Config() :
 				'status' : 'icon',
 				'filestatus' : 'icon',
 			}
+		mamefields = [
+				["name", str, True, False, False],
+				["path", str, True, True, True],
+				["version", str, True, True, True],
+		]
 		self.__fields = {
 				'romsets' : {
 					'load':{},		#
@@ -1022,9 +1032,14 @@ class Config() :
 					'colnames':[],	# for gtk, translated column names
 					'public':[],	# for gtk tree items and cli list requests, which attr to display in these columns
 					'mame':[],		# for gtk tree for updating only the mame version dependent fields of romsets
+					'mameload': romsetmamefields
 					},
 				'mame' : {
-					'load':romsetmamefields,
+					'load':{},		#
+					'save':[],		#
+					'coltypes':[],	# for gtk, value type of each column
+					'colnames':[],	# for gtk, translated column names
+					'public':[],	# for gtk tree items and cli list requests, which attr to display in these columns
 				}
 			}
 		col=0
@@ -1044,8 +1059,25 @@ class Config() :
 				else : render = renders[nme]
 				self.__fields['romsets']['colnames'].append((colname,render))
 				# mame fields
-				if nme in romsetmamefields :
+				if nme in self.__fields['romsets']['mameload'] :
 					self.__fields['romsets']['mame'].append((col,nme))
+				col += 1
+		col=0
+		for i,(nme,tpe,in_ui,in_load,in_save) in enumerate(mamefields) :
+			if in_load :
+				self.__fields['mame']['load'][nme] = tpe
+			if in_save :
+				self.__fields['mame']['save'].append(nme)
+			if in_ui :
+				self.__fields['mame']['public'].append(nme)
+				self.__fields['mame']['coltypes'].append(tpe)
+				# columns names and render type
+				colintname = 'col%s'%nme.title()
+				if colintname not in self.txt : colname = '*%s'%nme	# a translation is missing
+				else : colname = self.txt[colintname]
+				if nme not in renders : render = 'text'
+				else : render = renders[nme]
+				self.__fields['mame']['colnames'].append((colname,render))
 				col += 1
 
 		# print('FIELDS CHECK')
@@ -1273,8 +1305,6 @@ def verifyrom() :
 			'file':romsetstatus,
 			'roms':roms
 		}
-
-
 
 
 # if __name__ == '__main__':

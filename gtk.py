@@ -9,6 +9,50 @@ def nextrow(start) :
 	while True :
 		yield start
 		start += 1
+
+class DialogAdd(Gtk.Dialog):
+
+	def __init__(self, title, labels, extra_bts, parent):
+		Gtk.Dialog.__init__(self, title, parent, 0)
+		
+		self.set_default_size(250, 100)
+		self.set_border_width(10)
+		
+		self.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+		for bt, btresp in extra_bts :
+			self.add_button(bt,btresp)
+		self.add_buttons(Gtk.STOCK_OK, Gtk.ResponseType.OK)
+
+		self.box = self.get_content_area()
+		self.grid = Gtk.Grid()
+		self.grid.set_row_spacing(5)
+		self.grid.set_column_spacing(5)
+		self.box.add(self.grid)
+		
+		self.entry = []
+		
+		row = nextrow(0)
+		for lbl,default_text,checklist in labels :
+			r = next(row)
+			self.grid.attach(lbl,0,r,1,1)
+
+			thisentry = Gtk.Entry()
+			self.entry.append(thisentry)
+			
+			if default_text :
+				thisentry.set_text(default_text)
+			
+			# thisentry.set_margin_top(10)
+			# thisentry.set_margin_bottom(10)
+			thisentry.set_has_frame(False)
+			# print(thisentry.size_request)
+			# thisentry.set_size_request(200,30)
+			if checklist :
+				thisentry.connect('activate',parent.check_entry,checklist)
+				thisentry.connect('focus-out-event',parent.check_entry_event,checklist)
+			
+			self.grid.attach(thisentry,1,r,1,1)
+
 		
 class AppWindow(Gtk.ApplicationWindow):
 
@@ -41,18 +85,19 @@ class AppWindow(Gtk.ApplicationWindow):
 			self.ico[k] = GdkPixbuf.Pixbuf.new_from_file(os.path.join(iconpth,v))
 
 		buttons = {
-			'run' : ['run',True],
-			'add' : ['add',True],
-			'edit' : ['edit',True],
-			'del' : ['del',True],
-			'addD' : ['add', True],
-			'editD' : ['edit',True],
-			'delD' : ['del',True],
-			'verify' : ['romsetMameNone',False],
-			'verifyAll' : ['romsetMameNone',False],
-			'runR' : ['romsetMameNone',False],
-			'save' : ['saveConfig',True],
-		}
+				'run' : ['run',True],
+				'add' : ['add',True],
+				'edit' : ['edit',True],
+				'del' : ['del',True],
+				'addD' : ['add', True],
+				'editD' : ['edit',True],
+				'delD' : ['del',True],
+				'verify' : ['romsetMameNone',False],
+				'verifyAll' : ['romsetMameNone',False],
+				'runR' : ['romsetMameNone',False],
+				'save' : ['saveConfig',True],
+				'guess' : ['guess',True],
+			}
 		self.bt = {}
 		for k,v in buttons.items() :
 			txt,state = v
@@ -67,6 +112,13 @@ class AppWindow(Gtk.ApplicationWindow):
 			'romsetsTree' : 'romsetsFrameLabel',
 			'romsetTree' : 'romsetFrameLabel',
 			'tasks' : 'tasksFrameLabel',
+			
+			'addMameTitle' : 'addMameTitle',
+			'editMameTitle' : 'editMameTitle',
+			'addName' : 'addName',
+			'addPath' : 'addPath',
+			'addVersion' : 'addVersion',
+			'guess' : 'guess',
 		}
 		self.lbl = {}
 		for k,v in self.labels.items() :
@@ -83,31 +135,22 @@ class AppWindow(Gtk.ApplicationWindow):
 		########
 		
 		## TREE
-		self.mameModel = Gtk.ListStore(str,str,str)
+		coltypes = cfg.fields['mame']['coltypes']
+		self.mameModel = Gtk.ListStore(*coltypes)
 		self.mameTree = Gtk.TreeView(model=self.mameModel)
-		
-		# column = Gtk.TreeViewColumn("mame tree")
-		# name = Gtk.CellRendererText()
-		# version = Gtk.CellRendererText()
-		# path = Gtk.CellRendererText()
-		
-		# column.pack_start(name, True)
-		# column.pack_start(version, True)
-		# column.pack_start(path, True)
-		
-		# column.add_attribute(name, "text", 0)
-		# column.add_attribute(version, "text", 1)
-		# column.add_attribute(path, "text", 2)
 
-		for i, colname in enumerate([cfg.txt['colName'], cfg.txt['colVersion'], cfg.txt['colPath']]):
-			renderer = Gtk.CellRendererText()
-			header = Gtk.TreeViewColumn(colname, renderer, text=i)
+		for i, (colname,render) in enumerate(cfg.fields['mame']['colnames']):
+			if render == 'text' :
+				renderer = Gtk.CellRendererText()
+				header = Gtk.TreeViewColumn(colname, renderer, text=i)
+			elif render == 'icon' :
+				renderer = Gtk.CellRendererPixbuf()
+				header = Gtk.TreeViewColumn(colname,renderer)
+				header.set_cell_data_func(renderer, self.get_tree_cell_pixbuf,i)
 			self.mameTree.append_column(header)
 
-		# self.mameTree.append_column(column)
-
-		mameTreeSelect = self.mameTree.get_selection()
-		mameTreeSelect.connect("changed", self.tree_select,Mame)
+		self.mame = self.mameTree.get_selection()
+		self.mame.connect("changed", self.tree_select,Mame)
 		
 		## BUTTONS
 		mameBt = Gtk.ButtonBox.new(Gtk.Orientation.HORIZONTAL)
@@ -149,7 +192,6 @@ class AppWindow(Gtk.ApplicationWindow):
 		self.romsetsTree = Gtk.TreeView(model=self.romsetsModel)
 
 		for i, (colname,render) in enumerate(cfg.fields['romsets']['colnames']) :
-			# renderer = Gtk.CellRendererText()
 			if render == 'text' :
 				renderer = Gtk.CellRendererText()
 				header = Gtk.TreeViewColumn(colname, renderer, text=i)
@@ -273,7 +315,7 @@ class AppWindow(Gtk.ApplicationWindow):
 		
 		## mame
 		for m in Mame.getall() :
-			self.mameModel.append([m.name,m.version,m.path])
+			self.mameModel.append(m.fields())
 		## romdir
 		for d in Romdir.getall() :
 			self.romdirModel.append([d.name,d.path])
@@ -446,15 +488,6 @@ class AppWindow(Gtk.ApplicationWindow):
 					for col,fld in enumerate(cfg.fields['romsets']['public']) :
 						r[col] = getattr(romset,fld)
 					break
-			# if romset.name in self.romsetnames :
-				# idx = self.romsetnames.index(romset.name)
-				# treeiter = self.romsetsModel.get_iter((idx,))
-				# print('romset_verified',romset.name,idx)
-				# for col,fld in enumerate(cfg.fields['romsets']['public']) :
-					# treeiter[col] = getattr(romset,fld)
-						# for r in self.romsetsModel :
-							# s = rd.romset[r[0]]
-							# for col,fld in mameflds :
 		
 	def all_romset_verified(self,*args) :
 		tskbasename,status,count,total,since,duration = args
@@ -494,13 +527,12 @@ class AppWindow(Gtk.ApplicationWindow):
 			rd.verify(m.name,self.romset_verified,self.all_romset_verified)
 		
 	def tasks_update(self,tskname,*args) :
-		tsktype = tskname.split('\\')[0]
 		tsk = self.tasks[tskname]
 		tsk['progress'] += 1
-		v = tsk['progress']/tsk['total']
 		tsktype = tskname.split('\\')[0]
 		pbartxt = cfg.txt['task.%s'%tsktype]%(tsk['progress'],tsk['total'],tsk['romdir'].name,tsk['mame'].name)
 		tsk['bar'].set_text(pbartxt)
+		v = tsk['progress']/tsk['total']
 		tsk['bar'].set_fraction(v)
 	
 	def tasks_done(self,tskname,*args) :
@@ -514,22 +546,137 @@ class AppWindow(Gtk.ApplicationWindow):
 		if len(self.tasks) :
 			nexttaskname = list(self.tasks.keys())[0]
 			self.tasks_run(nexttaskname)
-			
+	
+	def check_entry_event(self,widget,event,existing) :
+		print('check_entry event')
+		self.check_entry(widget,existing)
+		
+	def check_entry(self,widget,existing) :
+		print('check_entry %s %s'%(widget,existing))
+		if widget.get_text().lower() in existing :
+			print('exist')
+			pass
+		
 	## all buttons actions
-	def button_clicked(self, widget,btname):
+	def button_clicked(self, widget,btname,*args):
 		print('button %s clicked'%(btname))
 		if btname == 'run' :
 			Mame.getActive().run()
-		elif btname == 'add' :
-			pass
-			# treeiter = self.romsetsModel.get_iter((0,))
-			# selname = self.romsetsModel[treeiter][0]
-			# self.romsetsModel[treeiter][2] = 'yes'
 		
-		elif btname == 'edit' : 
-			pass
-		elif btname == 'del' :
-			pass
+		elif btname in ['add','edit'] :
+			
+			if btname == 'add' :
+				dialog_title = cfg.txt['addMameTitle']
+				Mamename = None
+				Mamepath = None
+				Mameversion = None
+			else :
+				dialog_title = cfg.txt['editMameTitle']
+				m = Mame.getActive()
+				Mamename = m.name
+				Mamepath = m.path
+				Mameversion = m.version
+				
+			self.existingmame = []
+			self.existingmamepath = []
+			for m in Mame.getall() :
+				if Mamename != m.name : self.existingmame.append(m.name.lower())
+				if Mamepath != m.path : self.existingmamepath.append(m.path.lower())
+			
+			dialog = DialogAdd(
+					dialog_title,
+					[
+					[self.lbl['addName'],Mamename,self.existingmame],
+					[self.lbl['addPath'],Mamepath,self.existingmamepath],
+					[self.lbl['addVersion'],Mameversion,None]
+					],
+					[[cfg.txt['guess'],10]],
+					self
+				)
+
+			select_mame_exe = Gtk.Button(label="...")
+			select_mame_exe.connect("clicked", self.button_clicked,'mamefile',dialog.entry[1])
+		
+			dialog.grid.attach(select_mame_exe,2,1,1,1)
+			
+			dialog.show_all()
+			
+			destroy = False
+			while not(destroy) :
+				response = dialog.run()
+				
+				print('response %s'%response)
+				
+				if response == Gtk.ResponseType.OK:
+					if btname == 'add' :
+						newm = Mame(dialog.entry[1].get_text(),dialog.entry[0].get_text())
+						newm.version = dialog.entry[2].get_text()
+						print(newm.path)
+						if isinstance(newm,Mame) :
+							r = [getattr(newm,fld) for fld in cfg.fields['mame']['public']]
+							self.mameModel.append(r)
+							destroy = True
+					else :
+						m = Mame.getActive()
+						mpreviousname = m.name
+						# a name exist ? check is done in the Mame.name setter,
+						# so this avoid a False positive
+						if dialog.entry[0].get_text() != mpreviousname :
+							m.name = dialog.entry[0].get_text()
+						m.path = dialog.entry[1].get_text()
+						m.version = dialog.entry[2].get_text()
+						for r in self.mameModel :
+							if r[0] == mpreviousname :
+								for col,fld in enumerate(cfg.fields['mame']['public']) :
+									r[col] = getattr(m,fld)
+									destroy = True
+									break
+				
+				elif response in [Gtk.ResponseType.CANCEL,-4]:
+					print("The Cancel button was clicked")
+					destroy = True
+				elif response == 10:
+					print("The guess button was clicked")
+			
+			dialog.destroy()
+			
+		elif btname == 'del' :			
+			
+			(model, iter) = self.mame.get_selected()
+			if iter is not None:
+				print("%s has been removed" % (model[iter][0]))
+				self.mameModel.remove(iter)
+				m = Mame.getActive()					
+				Mame.remove(m.name)
+			else:
+				print("Select a title to remove")
+			
+		elif btname == 'mamefile' :
+			dialog = Gtk.FileChooserDialog(title="Please choose a file", parent=self, action=Gtk.FileChooserAction.OPEN) #,
+
+			dialog.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+			dialog.add_buttons(Gtk.STOCK_OK, Gtk.ResponseType.OK)
+
+			filter_mame = Gtk.FileFilter()
+			filter_mame.set_name("Mame executable")
+			filter_mame.add_pattern("mame*.exe")
+			dialog.add_filter(filter_mame)
+
+			filter_any = Gtk.FileFilter()
+			filter_any.set_name("All")
+			filter_any.add_pattern("*")
+			dialog.add_filter(filter_any)
+		
+			response = dialog.run()
+			if response == Gtk.ResponseType.OK:
+				args[0].set_text(dialog.get_filename())
+				self.check_entry(args[0],self.existingmamepath)
+				
+			elif response == Gtk.ResponseType.CANCEL:
+				print("Cancel clicked")
+
+			dialog.destroy()
+		
 		elif btname == 'addD' : 
 			pass
 		elif btname == 'editD' :

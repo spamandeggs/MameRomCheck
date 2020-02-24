@@ -67,6 +67,7 @@ fr
 	
 	errorPathWrongTitle				Mauvais chemin
 	errorPathWrong					Ce chemin n'existe pas.
+	errorPathExist					Ce Chemin existe déjà
 
 	errorMameNone					Definir au moins une installation de Mame.
 	errorMameUnknown				installation de Mame inconnue : %s.
