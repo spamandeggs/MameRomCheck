@@ -49,7 +49,7 @@ The GTK user interface will open
 ```
 python bin/tk.py
 ```
-The tkinter user interface will open. Please not I work first on the GTK ui for now, (2020/03/01)
+The tkinter user interface will open. Please note I work first on the GTK ui for now, (2020/03/01)
 so everything wont work as it should with tkinter.
 
 #### add Mame installations
@@ -71,21 +71,6 @@ so everything wont work as it should with tkinter.
 #### run
 - a romset will be ok if the driver is reported as 'good' in the romset view/driver column (but this need a couple more tests to be sure [bios tests, split romset etc...])
 - try the 'Run with Mame xxx' button
-
-#### important 
-- when you close the application, you should see the python console. Type :
-```
-task.info()
-```
-if the tasks manager is stopped. you can
-```
-exit()
-```
-else wait a bit, the console will warn you when it's finished. or you can
-```
-task.stop()
-```
-then leave. If you don't, the python console will hang and you'll need to kill the python process from the task manager to close it.
 
 ### API
 
