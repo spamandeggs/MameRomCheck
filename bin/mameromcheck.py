@@ -1,4 +1,4 @@
-# python3.73
+# python3.8.2
 # coding=utf-8
 '''
 Mame Rom Check
@@ -22,14 +22,19 @@ along with Mame Rom Check. If not, see http://www.gnu.org/licenses/.
 '''
 
 import os
-from tasks import *
 from xml.dom import minidom
 from collections import OrderedDict as odict
-# import weakref
 
-from mf3parse import mfl2dict, mfl2Odict, dict2mfl
-
-from version import version, lastrev
+# when mrc is run from bootstrap module name is bin.mameromcheck
+# when run from python bin, it's mameromcheck
+if __name__ == 'bin.mameromcheck' :
+	from . tabs import mfl2dict, mfl2Odict, dict2mfl
+	from . version import version, lastrev
+	from . tasks import *
+else :
+	from tabs import mfl2dict, mfl2Odict, dict2mfl
+	from version import version, lastrev
+	from tasks import *
 
 def getlocales(locale) :
 	loc = {}

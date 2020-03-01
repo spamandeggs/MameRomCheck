@@ -1,4 +1,4 @@
-# python3.73
+# python3.8.2
 # coding=utf-8
 '''
 Mame Rom Check
@@ -25,9 +25,10 @@ along with Mame Rom Check. If not, see http://www.gnu.org/licenses/.
 ## romdirs dialogs ##
 #####################
 
-from ui_mameexes import *
-
-
+if __name__ == 'bin.tk_romdirs' :
+	from . tk_mameexes import *
+else :	
+	from tk_mameexes import *
 
 class UI_romdirs(UI_mameexes) :
 	

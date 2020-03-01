@@ -1,10 +1,12 @@
+[ updated 1st of March 2020 ]
+
 # MameRomCheck
 yet another tool to manage Mame Roms - ui and api
 
 it has a gui (tkinter or gtk) and an api. This is very early release, but non destructive,
 since it only get informations and dont touch anything (for now..)
 
-Goal is toProvide a 'simple' user interface and a python api to get efficient romset listing inside Mame
+Goal is to Provide a 'simple' user interface and a python api to get efficient romset listing inside Mame
 without weeks of self-education about how Mame work :
 * check wether a rom is *really* playable (not only marked as *working*)
 * check several romsets against several releases of Mame
@@ -17,9 +19,15 @@ Goal is not to compete with very powerful analysis tools like clrMamePro or romC
 But both needs a lot of self eductation about how Mame work, and so far I was not able to automatically check wether a romset 
 is really playable or not / to only keep the playable romsets in my roms directories.
 
-### environment :
-- Windows 10
-- Python 3.7.3
+### environment(s) :
+- Windows 10 for now
+
+for GTK interface :
+- python3.8.2 from mingw64
+- the GTK library
+
+for TKinter interface :
+- python3.7+ for windows from python.org
 - PIL (pip install pillow)
 
 this should work in other context, provided you use a Python 3.7+ release, but didn't get the chance to test yet.
@@ -32,17 +40,17 @@ this should work in other context, provided you use a Python 3.7+ release, but d
 - If you didnt have 7-zip then you should :). Install it (and uninstall winrar, winzip etc once confident).
 - copy 7z.exe, 7z.dll and License.txt from in the ./bin directory
 - cd to the top level of the directory then :
-```
-python ui.py
-```
-The tkinter user interface will open
-
-OR
 
 ```
-python gtk.py
+python bin
 ```
 The GTK user interface will open
+
+```
+python bin/tk.py
+```
+The tkinter user interface will open. Please not I work first on the GTK ui for now, (2020/03/01)
+so everything wont work as it should with tkinter.
 
 #### add Mame installations
 - click the add button under the Mame releases area and browse to your Mame64.exe runtime, 
@@ -73,16 +81,23 @@ if the tasks manager is stopped. you can
 ```
 exit()
 ```
-else wait a bit, the console willl warn you when it's finished. or you can
+else wait a bit, the console will warn you when it's finished. or you can
 ```
 task.stop()
 ```
 then leave. If you don't, the python console will hang and you'll need to kill the python process from the task manager to close it.
 
 ### API
+
+Actually the core code is apart from the interface so on could script operations or integrate in another python project.
+
+
+to run and play from a python console :
 ```
-python -i mameromcheck.py
+python -i bin/mameromcheck.py
 ```
+
+the ui's make use of the methods listed below, so can you.
 
 ```python
 Mame.list()         # list your Mame Releases (ordered as in the conf.default.tab file and the ui)
@@ -116,4 +131,4 @@ task.verbose    # True|False
 
 cfg.save()      # save everything in conf/default.tab. file is human readable
 
-[WIP]
+[! WIP WIP WIP !]

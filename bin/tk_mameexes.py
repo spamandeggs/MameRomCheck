@@ -1,4 +1,4 @@
-# python3.73
+# python3.8.2
 # coding=utf-8
 '''
 Mame Rom Check
@@ -25,10 +25,13 @@ along with Mame Rom Check. If not, see http://www.gnu.org/licenses/.
 ## mameexe dialogs ##
 #####################
 
-import mameromcheck
-from mameromcheck import *
-from ui_helpers import *
-
+if __name__ == 'bin.tk_mameexes' :
+	from . tk_mameexes import *
+	from . tk_helpers import *
+else :	
+	from mameromcheck import *
+	from tk_helpers import *
+	
 class UI_mameexes(ttk.Frame) :
 
 	def mameExeAddDialog(self) :

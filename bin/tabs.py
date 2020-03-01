@@ -1,4 +1,4 @@
-# python3.73
+# python3.8.2
 # coding=utf-8
 '''
 Mame Rom Check

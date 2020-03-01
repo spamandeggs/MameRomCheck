@@ -1,2 +1,6 @@
+https://www.7-zip.org
+Download 7-Zip 19.00 (2019-02-21) for Windows
+open archive or install then copy/paste these two files in this folder :
+
 7z.dll 19.00 modified 21/02/2019 SHA256: 34AD9BB80FE8BF28171E671228EB5B64A55CAA388C31CB8C0DF77C0136735891
 7z.exe 19.00 modified 21/02/2019 SHA256: 344F076BB1211CB02ECA9E5ED2C0CE59BCF74CCBC749EC611538FA14ECB9AAD2

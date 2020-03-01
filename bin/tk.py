@@ -1,4 +1,4 @@
-# python3.73
+# python3.8.2
 # coding=utf-8
 '''
 Mame Rom Check
@@ -21,8 +21,12 @@ You should have received a copy of the GNU General Public License
 along with Mame Rom Check. If not, see http://www.gnu.org/licenses/.
 '''
 
-from ui_romdirs import *
 from time import sleep
+
+if __name__ == 'bin.tk' :
+	from . tk_romdirs import *
+else :	
+	from tk_romdirs import *
 
 ###################
 
@@ -142,7 +146,7 @@ class UI(UI_romdirs) :
 			'size' : cfg.txt['colSize'],
 			'comment' : cfg.txt['colComment'],
 			'romscount' : cfg.txt['colRomscount'],
-			'warnings' : cfg.txt['colWarning'],
+			'warnings' : cfg.txt['colWarnings'],
 			'error' : cfg.txt['colError'],
 			})
 		self.romsetsCols = list(treecols.keys())

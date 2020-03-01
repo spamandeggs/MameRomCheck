@@ -1,9 +1,39 @@
-import sys, gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf
+# python3.8.2
+# coding=utf-8
+'''
+Mame Rom Check
 
-import mameromcheck
-from mameromcheck import *
+Copyright 2020 Jérôme Mahieux
+
+This file is part of Mame Rom Check.
+
+Mame Rom Check is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+Mame Rom Check is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Mame Rom Check. If not, see http://www.gnu.org/licenses/.
+'''
+
+import sys, gi
+
+# when mrc is run from bootstrap module name is bin.gtk
+# when run from python bin, it's gtk
+if __name__ == 'bin.gtk' : from . mameromcheck import *
+else : from mameromcheck import *
+
+# strangely require_version is reported as missing attribute
+# when run from static, so :
+# if sys.path[0].split('\\')[-1] != 'base_library.zip' : 
+gi.require_version('Gtk', '3.0')
+
+from gi.repository import Gtk, GdkPixbuf
 
 def nextrow(start) :
 	while True :
@@ -53,7 +83,6 @@ class DialogAdd(Gtk.Dialog):
 			
 			self.grid.attach(thisentry,1,r,1,1)
 
-		
 class AppWindow(Gtk.ApplicationWindow):
 
 	def __init__(self, app):
@@ -705,8 +734,8 @@ class AppWindow(Gtk.ApplicationWindow):
 			s.run(MameName)
 
 		elif btname == 'save' : 
-			cfg.save()		
-	
+			cfg.save()
+
 class App(Gtk.Application):
 
 	def __init__(self):
